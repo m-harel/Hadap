@@ -56,7 +56,7 @@ class FlyingSaucer {
   
 };
 
-const int numberOfFS = 10;
+const int numberOfFS = 12;
 FlyingSaucer flyingSaucers[numberOfFS];
 
 const int numberOfStars = 27;
@@ -65,7 +65,17 @@ Star stars[numberOfStars];
 class Animation {
 
   public:
+    unsigned long startTime;
     virtual void render() = 0;
+    void startStory()
+    {
+      startTime = millis();
+    }
+    
+    bool endStory()
+    {
+      return millis() - startTime > 10000;
+    }
   
 };
 
@@ -716,8 +726,8 @@ void loop() {
       const FlyingSaucer &fs = flyingSaucers[s];
 
       int stickStartIndex;
-      if (s >= 5) {
-        stickStartIndex = ((s % 5) * fs.totalPixels) + 600;
+      if (s >= 6) {
+        stickStartIndex = ((s % 6) * fs.totalPixels) + 600;
       }else{
         stickStartIndex = s * fs.totalPixels;
       }
@@ -752,12 +762,17 @@ void loop() {
 }
 
 void render() {
-
-  EVERY_N_SECONDS(30) {
+  if(animations[currentBaseAnimation]->endStory())
+  {
     currentBaseAnimation = (currentBaseAnimation + 1) % ARRAY_SIZE(animations);
+    animations[currentBaseAnimation]->startStory();
     for(int s=0; s<numberOfFS; s++) {
       FlyingSaucer &fs = flyingSaucers[s];
       fs.clear();
+    }
+    for(int s=0; s<numberOfStars; s++) {
+      Star &star = stars[s];
+      star.clear();
     }
   }
 
