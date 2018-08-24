@@ -56,10 +56,10 @@ class FlyingSaucer {
   
 };
 
-const int numberOfFS = 14;
+const int numberOfFS = 10;
 FlyingSaucer flyingSaucers[numberOfFS];
 
-const int numberOfStars = 18;
+const int numberOfStars = 27;
 Star stars[numberOfStars];
 
 class Animation {
@@ -716,8 +716,8 @@ void loop() {
       const FlyingSaucer &fs = flyingSaucers[s];
 
       int stickStartIndex;
-      if (s >= 8) {
-        stickStartIndex = ((s % 8) * fs.totalPixels) + 600;
+      if (s >= 5) {
+        stickStartIndex = ((s % 5) * fs.totalPixels) + 600;
       }else{
         stickStartIndex = s * fs.totalPixels;
       }
