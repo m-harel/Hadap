@@ -67,14 +67,14 @@ class Animation {
   public:
     unsigned long startTime;
     virtual void render() = 0;
-    void startStory()
+    virtual void startStory()
     {
       startTime = millis();
     }
     
-    bool endStory()
+    virtual bool endStory()
     {
-      return millis() - startTime > 10000;
+      return millis() - startTime > 30000;
     }
   
 };
