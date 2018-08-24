@@ -69,7 +69,6 @@ class Animation {
   
 };
 
-
 class BreathAnimation : public Animation {
 
   public:
@@ -680,6 +679,48 @@ class PinkColorAnimation : public Animation {
   }
 };
 
+class TravelingSnakesAnimation : public Animation {
+  private:
+    const int snakeSize = 10;
+
+    uint8_t getCurrentHue(){
+      return beatsin8(8) + beatsin8(17) + beatsin8(s * 4);
+    }
+
+    uint8_t getPieceActivation(int piece){
+      return (uint8_t)((255 * piece * piece) / (snakeSize * snakeSize));
+    }
+
+  public:
+
+  void render() {
+    int MOD = numberOfFS * FlyingSaucer.side_total;
+    uint8_t topHue = beatsin8(3);
+    
+    for(int s=0; s<numberOfFS; s++) {
+      FlyingSaucer &fs = flyingSaucers[s];
+      fs.clear();
+    }
+
+    // The snakes current color
+    int speed = 3;
+    uint8_t snakeColor = getCurrentHue();
+    int currentStartIndex = beatsin16(speed, 0, MOD);
+    for(int pieceIndex = 0; pieceIndex < snakeSize; ++pieceIndex){
+        int currentIndex = pieceIndex + currentStartIndex;
+        currentIndex %= MOD;
+        uint8_t ativation = getPieceActivation(pieceIndex);
+        flyingSaucers[currentIndex/numberOfFS].leds[FlyingSaucer.side_start + currentIndex % FlyingSaucer.side_total]
+          = CHSV(snakeColor, 255, ativation);
+    }
+
+    for(int i=0; i<numberOfStars; i++) {
+      uint8_t activation = beatsin8(7) + beatsin8(15) + beatsin8(i * 4);
+      uint8_t hue = beatsin8(8) + beatsin8(5) + beatsin8(i * 2);
+      stars[i].leds[0] = CHSV(hue, 255, activation);
+    }
+  }
+}
 
 
 static BreathAnimation breath;
@@ -763,10 +804,3 @@ void render() {
 
   animations[currentBaseAnimation]->render();
 }
-
-
-
-
-
-
-
