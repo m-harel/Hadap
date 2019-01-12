@@ -351,72 +351,86 @@ class ZionOneToFourAnimation : public Animation {
   int beatsinForStar[numberOfStars] = {0};
   
   void render() {
+        int hue1 = 130, hue2 = 191;
     for (int s=0; s<numberOfStars; s++) {
 
       Star &star = stars[s];
       CHSV &pixel = star.leds[0];
       uint8_t bottomValue = beatsin8(beatsinForStar[s], 20, 255);
-      pixel.hue = 160;
-      pixel.sat = beatsin8(25);
+      pixel.hue = hue2;
+      pixel.sat = beatsin8(25,40,255);
       pixel.val = bottomValue;
     }
-    
     for(int s=0; s<numberOfFS; s++) {
-
+    uint8_t breath = beatsin8(4+s, 50,200);
         FlyingSaucer &fs = flyingSaucers[s];
         for(int i=fs.side_start; i < fs.side_end; i++) {
-
+          int tick = beat8(2);int myBreath = breath;
+          
           CHSV &pixel = fs.leds[i];
-          if (i % 5 != beat8(2) % 5) {
-            pixel.val = 0;
+          if (i % 5 != tick % 5) {
+          tick++;
+            if (i % 5 == tick % 5) {
+            pixel.val = 30;
             continue;
+            }
+            tick++;
+            if (i % 5 == tick % 5) {
+            pixel.val = 10;
+            continue;
+            }
+            
+                        pixel.val = 30;
+            continue;
+
+            
           }
-          if (i % 10!= beat8(2) % 5) {
-            pixel.sat = 255;
-            pixel.hue = 160;
-            pixel.val = 255;  
+          if (i % 5== tick % 5) {
+            pixel.sat =255 ;
+            pixel.hue = hue1;
+            pixel.val = myBreath;  
             continue;
           }
           pixel.sat = 0;
-          pixel.hue = 191;
-          pixel.val = 255;      
+          pixel.hue = hue2;
+          pixel.val = myBreath;      
         }
         for(int i=fs.top_start; i < fs.top_end; i++) {
           
           CHSV &pixel = fs.leds[i];
           if (i % 4 != beat8(1) % 4) {
-            pixel.val = 0;
-            pixel.hue = 0;
-            pixel.sat = 0;
+          pixel.hue = 0;
+          pixel.sat = 0;
+          pixel.val = breath; 
             continue;
           }
           if (i % 8!= beat8(2) % 4) {
-            pixel.sat = 255;
-            pixel.hue = 160;
-            pixel.val = 255;  
+        pixel.hue = 0;
+          pixel.sat = 0;
+          pixel.val = breath;  
             continue;
           }
-          pixel.hue = 160;
-          pixel.sat = 0;
-          pixel.val = 255;     
+          pixel.hue = 0;
+           pixel.sat = 0;
+          pixel.val = breath;     
         }
         for(int i=fs.bottom_start; i < fs.bottom_end; i++) {
           CHSV &pixel = fs.leds[i];
           if (i % 2 != beat8(1) % 2) {
-            pixel.val = 0;
-            pixel.hue = 0;
-            pixel.sat = 0;
+            pixel.val = 40;
+            pixel.hue = hue2;
+            pixel.sat = breath;
             continue;
           }
           if (i % 4!= beat8(2) % 2) {
-            pixel.sat = 255;
-            pixel.hue = 160;
-            pixel.val = 255;  
+            pixel.val = 40;
+            pixel.hue = hue2;
+            pixel.sat = breath;
             continue;
           }
-          pixel.hue = 160;
-          pixel.sat = 0;
-          pixel.val = 255;
+            pixel.val = 40;
+            pixel.hue = hue2;
+            pixel.sat = breath;
         }
     }
   }
@@ -694,7 +708,7 @@ class TravelingSnakesAnimation : public Animation {
     const int snakeSize = 10;
 
     uint8_t getCurrentHue(){
-      return beatsin8(8) + beatsin8(17) + beatsin8(s * 4);
+      return beatsin8(8) + beatsin8(17);
     }
 
     uint8_t getPieceActivation(int piece){
@@ -704,7 +718,7 @@ class TravelingSnakesAnimation : public Animation {
   public:
 
   void render() {
-    int MOD = numberOfFS * FlyingSaucer.side_total;
+    int MOD = numberOfFS * FlyingSaucer::side_total;
     uint8_t topHue = beatsin8(3);
     
     for(int s=0; s<numberOfFS; s++) {
@@ -712,25 +726,29 @@ class TravelingSnakesAnimation : public Animation {
       fs.clear();
     }
 
-    // The snakes current color
-    int speed = 3;
-    uint8_t snakeColor = getCurrentHue();
-    int currentStartIndex = beatsin16(speed, 0, MOD);
-    for(int pieceIndex = 0; pieceIndex < snakeSize; ++pieceIndex){
-        int currentIndex = pieceIndex + currentStartIndex;
-        currentIndex %= MOD;
-        uint8_t ativation = getPieceActivation(pieceIndex);
-        flyingSaucers[currentIndex/numberOfFS].leds[FlyingSaucer.side_start + currentIndex % FlyingSaucer.side_total]
-          = CHSV(snakeColor, 255, ativation);
+    int numberOfSnake = 2;
+    for(int snakeNumber = 0; snakeNumber < numberOfSnake; snakeNumber++){
+      int snakeOffset = snakeNumber * MOD / numberOfSnake;
+      // The snakes current color
+      int speed = 3;
+      uint8_t snakeColor = getCurrentHue();
+      int currentStartIndex = beatsin16(speed, 0, MOD);
+      for(int pieceIndex = 0; pieceIndex < snakeSize; ++pieceIndex){
+          int currentIndex = pieceIndex + currentStartIndex + snakeOffset;
+          currentIndex %= MOD;
+          uint8_t ativation = getPieceActivation(pieceIndex);
+          flyingSaucers[currentIndex/FlyingSaucer::side_total].leds[FlyingSaucer::side_start + currentIndex % FlyingSaucer::side_total]
+            = CHSV(snakeColor, 255, ativation);
+      }
     }
 
     for(int i=0; i<numberOfStars; i++) {
-      uint8_t activation = beatsin8(7) + beatsin8(15) + beatsin8(i * 4);
+      uint8_t activation = beatsin8(7) + beatsin8(3) + beatsin8(i * 4);
       uint8_t hue = beatsin8(8) + beatsin8(5) + beatsin8(i * 2);
-      stars[i].leds[0] = CHSV(hue, 255, activation);
+      stars[i].leds[0] = CHSV(hue, 255, activation/5);
     }
   }
-}
+};
 
 
 static BreathAnimation breath;
@@ -745,9 +763,11 @@ static SolidColorAnimation solidColor;
 static PinkColorAnimation pinkColor;
 
 static OnlyStarsAnimation onlyStartColor;
+static TravelingSnakesAnimation tsa;
 
 #define ARRAY_SIZE(A) (sizeof(A) / sizeof((A)[0]))
-Animation *animations[] = {&solidColor, &pinkColor, &psyRainbow, &oneToFourColor, &onlyStartColor, &snakeColfullFadingColor, &breath, &OneToFourFastColor, &confftieColor, &snakeColor, &zionOneToFourColor};
+Animation *animations[] = {&tsa, 
+&solidColor, &pinkColor, &psyRainbow, &oneToFourColor, &onlyStartColor, &snakeColfullFadingColor, &breath, &OneToFourFastColor, &confftieColor, &snakeColor, &zionOneToFourColor};
 //Animation *animations[] = {&confftieColor};
 int currentBaseAnimation = 0;
 
